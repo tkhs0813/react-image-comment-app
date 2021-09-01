@@ -1,26 +1,59 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useMemo, useState } from "react";
+import styled from "styled-components";
+import { Pixi } from "./components/Pixi";
 
-function App() {
+const Wrapper = styled.div`
+  display: flex;
+  width: 100vw;
+  min-width: 760px;
+`;
+
+type Chat = {
+  messages: {
+    id: string;
+    author: string;
+    createdAt: string;
+    message: string;
+  }[];
+  inputValue: string;
+  pin: { xRatio: number; yRatio: number }; // 0 ~ 1
+};
+
+const App = () => {
+  const [chatList, setChatList] = useState<Chat[]>([]);
+  const [activeChatIndex, setActiveChatIndex] = useState(0);
+
+  const createNewChat = (position: { xRatio: number; yRatio: number }) => {
+    console.log(position);
+    const filteredState = chatList.filter((c) => c.messages.length > 0);
+    setChatList([
+      ...filteredState,
+      {
+        messages: [],
+        inputValue: "",
+        pin: position,
+      },
+    ]);
+    setActiveChatIndex(filteredState.length);
+  };
+
+  // const updateMessageHandler = (value: string, index: number) => {};
+
+  // const submitMessageHandler = (index: number) => {};
+
+  const pinList = useMemo(() => {
+    return chatList.map((c) => c.pin);
+  }, [chatList]);
+  // const clickPinHandler = (index: number) => {};
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Wrapper>
+      <Pixi
+        pins={pinList}
+        addPin={createNewChat}
+        // clickPinHandler={clickPinHandler}
+      />
+    </Wrapper>
   );
-}
+};
 
 export default App;
