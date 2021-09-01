@@ -1,7 +1,8 @@
 import { Stage, Sprite, Container, Text } from "@inlet/react-pixi";
 import * as PIXI from "pixi.js";
 import useWindowSize from "../hooks/useWindowSize";
-import ramen from "../image/ramen.png";
+import ramen from "../image/ramen.jpg";
+import pin from "../image/pin.svg";
 import { useEffect, useState } from "react";
 import React from "react";
 
@@ -16,11 +17,6 @@ type Props = {
   // clickPinHandler: (index: number) => void;
 };
 
-type Position = {
-  x: number;
-  y: number;
-};
-
 const numberStyle = new PIXI.TextStyle({
   fontFamily: "Arial",
   fill: ["#ffffff"],
@@ -29,21 +25,17 @@ const numberStyle = new PIXI.TextStyle({
 
 export const Pixi = (props: Props) => {
   // const [scale, setScale] = useState(0);
-  const [position, setPosition] = useState<Position>({
-    x: 0,
-    y: 0,
-  });
+
   const windowSize = useWindowSize();
-  const canvasWidth = windowSize.width / window.devicePixelRatio || 1;
-  const canvasHeight = windowSize.height / window.devicePixelRatio || 1;
+  const canvasWidth = windowSize.width || 1;
+  const canvasHeight = windowSize.height || 1;
   const anchor = 0.5;
 
   const [originalImageSize, setOriginalImageSize] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
-    console.log("aaa");
     const img = new Image();
-    img.src = "../image/ramen.jpg";
+    img.src = ramen;
 
     img.onload = function () {
       const _this = this as unknown as { width: number; height: number };
@@ -55,23 +47,23 @@ export const Pixi = (props: Props) => {
     <Stage width={canvasWidth} height={canvasHeight}>
       <Container>
         <Sprite
-          texture={PIXI.Texture.from("../image/ramen.jpg")}
+          texture={PIXI.Texture.from(ramen)}
           anchor={anchor}
-          x={position.x + canvasWidth * anchor}
-          y={position.y + canvasHeight * anchor}
+          x={canvasWidth * anchor}
+          y={canvasHeight * anchor}
           interactive={true}
           pointerdown={(e: PIXI.InteractionEvent) => {
             const imageSize = {
               x: originalImageSize.x,
               y: originalImageSize.y,
             };
+            console.log("e.data.global.x", e.data.global.x);
+            console.log("canvasWidth", canvasWidth);
+            console.log("imageSize.x", imageSize.x);
             const xRatio =
-              (e.data.global.x -
-                ((canvasWidth - imageSize.x) / 2 + position.x)) /
-              imageSize.x;
+              (e.data.global.x - (canvasWidth - imageSize.x) / 2) / imageSize.x;
             const yRatio =
-              (e.data.global.y -
-                ((canvasHeight - imageSize.y) / 2 + position.y)) /
+              (e.data.global.y - (canvasHeight - imageSize.y) / 2) /
               imageSize.y;
             props.addPin({
               xRatio,
@@ -82,16 +74,14 @@ export const Pixi = (props: Props) => {
         {props.pins.map((p, i) => {
           const positionX =
             originalImageSize.x * p.xRatio +
-            (canvasWidth - originalImageSize.x) / 2 +
-            position.x;
+            (canvasWidth - originalImageSize.x) / 2;
           const positionY =
             originalImageSize.y * p.yRatio +
-            (canvasHeight - originalImageSize.y) / 2 +
-            position.y;
+            (canvasHeight - originalImageSize.y) / 2;
           return (
             <React.Fragment key={`${p.xRatio} ${p.yRatio}`}>
               <Sprite
-                texture={PIXI.Texture.from("../image/pin.svg")}
+                texture={PIXI.Texture.from(pin)}
                 anchor={anchor}
                 x={positionX}
                 y={positionY - 10}
